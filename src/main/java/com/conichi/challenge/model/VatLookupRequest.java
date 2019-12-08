@@ -1,4 +1,4 @@
-package com.conichi.challenge.dto;
+package com.conichi.challenge.model;
 
 /**
  * @Author Fazel Farnia

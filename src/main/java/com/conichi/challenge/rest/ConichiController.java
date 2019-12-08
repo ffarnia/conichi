@@ -1,8 +1,8 @@
 package com.conichi.challenge.rest;
 
-import com.conichi.challenge.dto.CurrencyConvertResponse;
-import com.conichi.challenge.dto.VatLookupRequest;
-import com.conichi.challenge.dto.VatLookupResponse;
+import com.conichi.challenge.model.CurrencyConvertResponse;
+import com.conichi.challenge.model.VatLookupRequest;
+import com.conichi.challenge.model.VatLookupResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;

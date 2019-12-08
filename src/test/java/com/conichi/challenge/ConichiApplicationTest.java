@@ -1,8 +1,8 @@
 package com.conichi.challenge;
 
-import com.conichi.challenge.dto.CurrencyConvertResponse;
-import com.conichi.challenge.dto.VatLookupRequest;
-import com.conichi.challenge.dto.VatLookupResponse;
+import com.conichi.challenge.model.CurrencyConvertResponse;
+import com.conichi.challenge.model.VatLookupRequest;
+import com.conichi.challenge.model.VatLookupResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

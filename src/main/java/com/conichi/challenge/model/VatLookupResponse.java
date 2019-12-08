@@ -1,4 +1,4 @@
-package com.conichi.challenge.dto;
+package com.conichi.challenge.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
