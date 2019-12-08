@@ -3,7 +3,6 @@ package com.conichi.challenge.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -12,9 +11,7 @@ import java.util.Map;
 public class CurrencyConvertResponse {
 
     private boolean success;
-    private String terms;
-    private String privacy;
-    private Date timestamp;
+    ;
     private String source;
     private Map<String, BigDecimal> quotes;
     private BigDecimal targetCurrencyAmount;
@@ -54,18 +51,6 @@ public class CurrencyConvertResponse {
 
     public void setSuccess(boolean success) {
         this.success = success;
-    }
-
-    public void setTerms(String terms) {
-        this.terms = terms;
-    }
-
-    public void setPrivacy(String privacy) {
-        this.privacy = privacy;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class MessageException {
     private Integer code;
     private String info;
-    private String type;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Integer getCode() {
@@ -26,14 +25,5 @@ public class MessageException {
 
     public void setInfo(String info) {
         this.info = info;
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }
