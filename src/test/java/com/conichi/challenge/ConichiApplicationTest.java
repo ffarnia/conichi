@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = ConichiApplication.class)
 @WebAppConfiguration
-class ConichiApplicationTests {
+class ConichiApplicationTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -54,9 +54,9 @@ class ConichiApplicationTests {
         assertEquals(200, status);
     }
 
-//    @Test
+    @Test
     public void convertCurrency() throws UnsupportedEncodingException, JsonProcessingException {
-        MvcResult mvcResult = setUp("/api/currency/convert/source-currency/USD/target-currency/EUR/amount/100");
+        MvcResult mvcResult = setUp("/api/currency/convert/amount/100/source-currency/USD/target-currency/EUR");
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();
@@ -65,14 +65,14 @@ class ConichiApplicationTests {
         assertEquals(new BigDecimal("89.345500"), convertDto.getTargetCurrencyAmount());
     }
 
-//    @Test
+    @Test
     public void lookupVatNumber() throws UnsupportedEncodingException, JsonProcessingException {
         MvcResult mvcResult = setUp("/api/lookupVat/LU26375245");
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();
         VatLookupResponse lookupResponse = mapper.readValue(content, VatLookupResponse.class);
-//        assertTrue(lookupResponse.isValid());
+        assertTrue(lookupResponse.isValid());
     }
 
 }

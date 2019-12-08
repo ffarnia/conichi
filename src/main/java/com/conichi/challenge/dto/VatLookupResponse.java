@@ -22,6 +22,7 @@ public class VatLookupResponse {
     @JsonProperty("BusinessAddress")
     private String businessAddress;
 
-
-
+    public boolean isValid() {
+        return valid;
+    }
 }
