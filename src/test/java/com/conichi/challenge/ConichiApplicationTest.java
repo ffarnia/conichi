@@ -24,9 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = ConichiApplication.class)
@@ -88,7 +86,7 @@ class ConichiApplicationTest {
         String content = mvcResult.getResponse().getContentAsString();
         CurrencyConvertResponse convertDto = mapper.readValue(content, CurrencyConvertResponse.class);
         assertFalse(convertDto.isSuccess());
-        assertEquals(202,convertDto.getError().getCode());
+        assertEquals(202, convertDto.getError().getCode());
     }
 
     @Test

@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Created by Fazel on 11/3/2019.
+ * @Author Fazel Farnia
+ * This is configuration class that set date format for all variables during serialization and deserialization
  */
 @Configuration
 public class AppConfig {

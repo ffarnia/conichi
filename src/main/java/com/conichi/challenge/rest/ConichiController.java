@@ -20,7 +20,9 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
- * Created by Fazel on 11/3/2019.
+ * @Author Fazel Farnia
+ * Controller class provide 3 rest webservice that is accessible via mentioned paths,
+ * some services use public Apis that provided on the internet
  */
 @CacheConfig(cacheNames = {"conichiServices"})
 @RestController

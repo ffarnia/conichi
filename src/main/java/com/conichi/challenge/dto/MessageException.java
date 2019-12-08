@@ -3,7 +3,7 @@ package com.conichi.challenge.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Created by Fazel on 11/3/2019.
+ * @Author Fazel Farnia
  */
 public class MessageException {
     private Integer code;

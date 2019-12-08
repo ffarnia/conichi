@@ -13,7 +13,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.Collections;
 
 /**
- * Created by Fazel on 11/3/2019.
+ * @Author Fazel Farnia
+ * Swagger configuration class make a good documentation for clients who want to consume Apis
  */
 @Configuration
 @EnableSwagger2

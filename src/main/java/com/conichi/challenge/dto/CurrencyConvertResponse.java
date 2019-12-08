@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Created by Fazel on 11/3/2019.
+ * @Author Fazel Farnia
  */
 public class CurrencyConvertResponse {
 

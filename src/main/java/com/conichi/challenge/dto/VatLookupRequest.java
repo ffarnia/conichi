@@ -1,7 +1,7 @@
 package com.conichi.challenge.dto;
 
 /**
- * Created by Fazel on 12/8/2019.
+ * @Author Fazel Farnia
  */
 public class VatLookupRequest {
 
