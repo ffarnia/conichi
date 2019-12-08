@@ -1,8 +1,9 @@
 package com.conichi.challenge.rest;
 
-import com.conichi.challenge.dto.CurrencyConvertDto;
+import com.conichi.challenge.dto.CurrencyConvertResponse;
 import com.conichi.challenge.dto.VatLookupRequest;
 import com.conichi.challenge.dto.VatLookupResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
@@ -27,10 +27,17 @@ import java.util.Map;
 @RequestMapping("/api")
 public class ConichiController {
 
-    private static final String CONVERTER_ACCESS_KEY = "52d9bcf431d0af0ee45df8718cb67362";
-    private static final String CONVERTER_END_POINT = "http://apilayer.net/api/live";
-    private static final String VAT_END_POINT = "https://api.cloudmersive.com/validate/vat/lookup";
-    private static final String VAT_API_KEY = "28e63794-ef8a-4616-80bb-26fdd3709a19";
+    @Value("${currency.converter.access.key}")
+    private String converterAccessKey;
+
+    @Value("${currency.converter.endpoint}")
+    private String converterEndpoint;
+
+    @Value("${vat.validation.endpoint}")
+    private String vatEndpoint;
+
+    @Value("${vat.api.key}")
+    private String vatApiKey;
 
     public ConichiController() {
     }
@@ -42,25 +49,25 @@ public class ConichiController {
 
     @Cacheable
     @RequestMapping(method = RequestMethod.GET, path = "/currency/convert/amount/{amount}/source-currency/{sourceCurrency}/target-currency/{targetCurrency}")
-    public CurrencyConvertDto convertCurrency(@PathVariable("amount") Integer amount,@PathVariable("sourceCurrency") String sourceCurrency, @PathVariable("targetCurrency") String targetCurrency) throws RemoteException {
-        ResponseEntity<CurrencyConvertDto> response = null;
+    public CurrencyConvertResponse convertCurrency(@PathVariable(name = "amount", required = true) Integer amount, @PathVariable(name = "sourceCurrency", required = true) String sourceCurrency, @PathVariable(name = "targetCurrency", required = true) String targetCurrency) throws RemoteException {
+        ResponseEntity<CurrencyConvertResponse> response = null;
         try {
-            response = new RestTemplate().getForEntity(CONVERTER_END_POINT + "?access_key=" + CONVERTER_ACCESS_KEY + "&source={sourceCurrency}&currencies={targetCurrency}", CurrencyConvertDto.class, sourceCurrency, targetCurrency);
+            response = new RestTemplate().getForEntity(converterEndpoint + "?access_key=" + converterAccessKey + "&source={sourceCurrency}&currencies={targetCurrency}", CurrencyConvertResponse.class, sourceCurrency, targetCurrency);
         } catch (RestClientException e) {
             throw new RemoteException("Error in currency conversion public api");
         }
-        CurrencyConvertDto convertDto = response.getBody();
-        CurrencyConvertDto currencyConvertDto = new CurrencyConvertDto();
+        CurrencyConvertResponse convertDto = response.getBody();
+        CurrencyConvertResponse currencyConvertResponse = new CurrencyConvertResponse();
         if (!convertDto.isSuccess()) {
             return convertDto;
         }
         Map<String, BigDecimal> quotes = convertDto.getQuotes();
-        currencyConvertDto.setTargetCurrency(targetCurrency);
-        currencyConvertDto.setSource(sourceCurrency);
-        currencyConvertDto.setTargetCurrencyAmount(quotes.get(sourceCurrency.concat(targetCurrency)).multiply(BigDecimal.valueOf(amount)));
-        currencyConvertDto.setQuotes(quotes);
-        currencyConvertDto.setSuccess(convertDto.isSuccess());
-        return currencyConvertDto;
+        currencyConvertResponse.setTargetCurrency(targetCurrency);
+        currencyConvertResponse.setSource(sourceCurrency);
+        currencyConvertResponse.setTargetCurrencyAmount(quotes.get(sourceCurrency.concat(targetCurrency)).multiply(BigDecimal.valueOf(amount)));
+        currencyConvertResponse.setQuotes(quotes);
+        currencyConvertResponse.setSuccess(convertDto.isSuccess());
+        return currencyConvertResponse;
 
     }
 
@@ -69,10 +76,10 @@ public class ConichiController {
     public ResponseEntity<VatLookupResponse> lookupVAT(@RequestBody VatLookupRequest vatLookupRequest) throws RemoteException {
         ResponseEntity<VatLookupResponse> response = null;
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Apikey", VAT_API_KEY);
+        headers.add("Apikey", vatApiKey);
         HttpEntity<VatLookupRequest> vatLookupRequestHttpEntity = new HttpEntity<>(vatLookupRequest, headers);
         try {
-            response = new RestTemplate().postForEntity(VAT_END_POINT, vatLookupRequestHttpEntity, VatLookupResponse.class);
+            response = new RestTemplate().postForEntity(vatEndpoint, vatLookupRequestHttpEntity, VatLookupResponse.class);
         } catch (RestClientException e) {
             throw new RemoteException("Error in VAT number validation public api");
         }
