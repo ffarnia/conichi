@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by Fazel on 11/3/2019.
  */
-public class CurrencyConvertDto {
+public class CurrencyConvertResponse {
 
     private boolean success;
     private String terms;

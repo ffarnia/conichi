@@ -1,6 +1,7 @@
 package com.conichi.challenge;
 
-import com.conichi.challenge.dto.CurrencyConvertDto;
+import com.conichi.challenge.dto.CurrencyConvertResponse;
+import com.conichi.challenge.dto.VatLookupRequest;
 import com.conichi.challenge.dto.VatLookupResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,8 +22,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -36,43 +39,96 @@ class ConichiApplicationTest {
     @Autowired
     WebApplicationContext webApplicationContext;
 
-    private MvcResult setUp(String uri) {
+    private MvcResult setUpForGetCall(String uri) {
         mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         MvcResult mvcResult = null;
         try {
             mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
         } catch (Exception e) {
-            LOGGER.error("Error in creating mvc request");
+            LOGGER.error("Error in creating integration test mvc request for Get calls");
+        }
+        return mvcResult;
+    }
+
+    private MvcResult setUpForPostCall(String uri, String jsonRequest) {
+        mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        MvcResult mvcResult = null;
+        try {
+            mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).content(jsonRequest).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+        } catch (Exception e) {
+            LOGGER.error("Error in creating integration test mvc request for Post calls");
         }
         return mvcResult;
     }
 
     @Test
-    public void getCurrestTime() {
-        MvcResult mvcResult = setUp("/api/currentTime");
+    public void checkCurrestTime() {
+        MvcResult mvcResult = setUpForGetCall("/api/currentTime");
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
     }
 
     @Test
-    public void convertCurrency() throws UnsupportedEncodingException, JsonProcessingException {
-        MvcResult mvcResult = setUp("/api/currency/convert/amount/100/source-currency/USD/target-currency/EUR");
+    public void checkResult_whenSpecificAmountAndCurrenciesIsGiven() throws UnsupportedEncodingException, JsonProcessingException {
+        MvcResult mvcResult = setUpForGetCall("/api/currency/convert/amount/100/source-currency/USD/target-currency/EUR");
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();
-        ObjectMapper mapper = new ObjectMapper();
-        CurrencyConvertDto convertDto = mapper.readValue(content, CurrencyConvertDto.class);
-        assertEquals(new BigDecimal("89.345500"), convertDto.getTargetCurrencyAmount());
+        CurrencyConvertResponse convertDto = mapper.readValue(content, CurrencyConvertResponse.class);
+        assertTrue(convertDto.isSuccess());
+        assertEquals(new BigDecimal("90.426100"), convertDto.getTargetCurrencyAmount());
+    }
+
+
+    @Test
+    public void checkErrorCode_whenInvalidTargetCurrencyIsGiven() throws UnsupportedEncodingException, JsonProcessingException {
+        MvcResult mvcResult = setUpForGetCall("/api/currency/convert/amount/100/source-currency/USD/target-currency/INVALIDEUR");
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+        String content = mvcResult.getResponse().getContentAsString();
+        CurrencyConvertResponse convertDto = mapper.readValue(content, CurrencyConvertResponse.class);
+        assertFalse(convertDto.isSuccess());
+        assertEquals(202,convertDto.getError().getCode());
     }
 
     @Test
-    public void lookupVatNumber() throws UnsupportedEncodingException, JsonProcessingException {
-        MvcResult mvcResult = setUp("/api/lookupVat/LU26375245");
-        int status = mvcResult.getResponse().getStatus();
-        assertEquals(200, status);
-        String content = mvcResult.getResponse().getContentAsString();
-        VatLookupResponse lookupResponse = mapper.readValue(content, VatLookupResponse.class);
+    public void checkValidationVatNumber_whenValidVatCodeIsGiven() throws UnsupportedEncodingException, JsonProcessingException, URISyntaxException {
+        VatLookupRequest vatLookupRequest = new VatLookupRequest();
+        vatLookupRequest.setVatCode("LU26375245");
+        MvcResult mvcResult = setUpForPostCall("/api/lookupVat", mapper.writeValueAsString(vatLookupRequest));
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        VatLookupResponse lookupResponse = mapper.readValue(responseBody, VatLookupResponse.class);
         assertTrue(lookupResponse.isValid());
+    }
+
+    @Test
+    public void checkVatNumberResult_whenValidVatCodeIsGiven() throws UnsupportedEncodingException, JsonProcessingException, URISyntaxException {
+        VatLookupRequest vatLookupRequest = new VatLookupRequest();
+        vatLookupRequest.setVatCode("CZ25123891");
+        MvcResult mvcResult = setUpForPostCall("/api/lookupVat", mapper.writeValueAsString(vatLookupRequest));
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        VatLookupResponse givenLookupResponse = mapper.readValue(responseBody, VatLookupResponse.class);
+        assertTrue(givenLookupResponse.isValid());
+        VatLookupResponse expectedVatLookupResponse = new VatLookupResponse();
+        expectedVatLookupResponse.setValid(true);
+        expectedVatLookupResponse.setCountryCode("CZ");
+        expectedVatLookupResponse.setVatNumber("25123891");
+        expectedVatLookupResponse.setBusinessName("K+K Hotel s.r.o.");
+        assertEquals(expectedVatLookupResponse, givenLookupResponse);
+
+    }
+
+    @Test
+    public void validateVatNumber_whenInvalidVatCodeIsGiven() throws UnsupportedEncodingException, JsonProcessingException, URISyntaxException {
+        VatLookupRequest vatLookupRequest = new VatLookupRequest();
+        vatLookupRequest.setVatCode("invalidCode");
+        MvcResult mvcResult = setUpForPostCall("/api/lookupVat", mapper.writeValueAsString(vatLookupRequest));
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        VatLookupResponse lookupResponse = mapper.readValue(responseBody, VatLookupResponse.class);
+        assertFalse(lookupResponse.isValid());
     }
 
 }
